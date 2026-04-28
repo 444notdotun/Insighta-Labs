@@ -14,6 +14,7 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    private Integer githubId;
     private String avatarUrl;
     private String userName;
     private Roles role;
