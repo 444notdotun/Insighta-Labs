@@ -36,7 +36,8 @@ public class JwtServiceImpl implements JwtService {
         return extractClaims(token).getSubject();
     }
     public Roles getRoleFromToken(String token){
-        return extractClaims(token).get("role",Roles.class);
+        String role = extractClaims(token).get("role", String.class);
+        return Roles.valueOf(role);
     }
 
     @Override
