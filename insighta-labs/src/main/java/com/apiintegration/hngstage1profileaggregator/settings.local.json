@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /home/notdotun/Desktop/GITHUB/Intelligence_query_machine/intelligenceQueryMachine status --short)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/)",
+      "Bash(curl -s -X GET \"http://localhost:8080/api/profiles/search?search=john\" -H \"Content-Type: application/json\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=male\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=female\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=adult\")",
+      "Bash(curl -s -X POST http://localhost:8080/api/profiles -H 'Content-Type: application/json' -d '{\"name\": \"James\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/profiles -H 'Content-Type: application/json' -d '{\"name\": \"__TRACKED_VAR__\"}')",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=senior\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=nigerian\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=nigerian%20male\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=nigerian%20%20male\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=over%2060\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles/search?search=senior%20male\")",
+      "Bash(curl -s \"http://localhost:8080/api/profiles?limit=10\")"
+    ]
+  }
+}
