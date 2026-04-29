@@ -1,4 +1,4 @@
-package com.apiintegration.hngstage1profileaggregator.data.model;
+package com.apiintegration.hngstage1profileaggregator.dtos.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
