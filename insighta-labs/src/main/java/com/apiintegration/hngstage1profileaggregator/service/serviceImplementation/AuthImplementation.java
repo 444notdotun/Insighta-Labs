@@ -36,9 +36,9 @@ public class AuthImplementation implements Auth {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    @Value("${github.client.id}")
+    @Value("${CLIENT_ID}")
     private String clientId;
-    @Value("${github.client.secret}")
+    @Value("${CLIENT_SECRET}")
     private String clientSecret;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -70,6 +70,7 @@ public class AuthImplementation implements Auth {
         );
         HttpRequest request = getHttpRequest(body, githubAuth.getAuthUrl());
         HttpResponse<String> response = getHttpResponseForAccessCodeResponseApi(request);
+        System.out.println("GitHub response: " + response.body());
         return objectMapper.readValue(response.body(), GithubResponse.class);
     }
 
@@ -80,7 +81,7 @@ public class AuthImplementation implements Auth {
     }
 
     private AuthResponse createAuthResponse(Users user) {
-        AuthResponse authResponse = new AuthResponse();
+       AuthResponse authResponse = modelMapper.map(user, AuthResponse.class);
         authResponse.setAccessToken(jwtService.generateToken(user));
         authResponse.setRefreshToken(refreshTokenService.generateRefreshToken(user));
         return authResponse;

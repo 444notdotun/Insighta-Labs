@@ -1,9 +1,12 @@
 package com.apiintegration.hngstage1profileaggregator.config.SecurityConfig;
 
 import com.apiintegration.hngstage1profileaggregator.config.JwtConfig.JwtConfiguration;
+import com.apiintegration.hngstage1profileaggregator.config.RateLimitFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,9 +18,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfigurations {
     @Autowired
     private JwtConfiguration jwtConfiguration;
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception {
@@ -26,8 +32,10 @@ public class SecurityConfigurations {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session-> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/auth/").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/","/api").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(rateLimitFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtConfiguration, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
@@ -41,6 +49,12 @@ public class SecurityConfigurations {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        return authentication -> {
+            throw new UnsupportedOperationException("No authentication manager needed");
+        };
     }
 
 }

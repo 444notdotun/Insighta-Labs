@@ -13,7 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/auth")
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
+
+@RestController
+@RequestMapping("/auth")
+
 public class AuthController {
     @Autowired
     private Auth authService;
@@ -30,12 +36,21 @@ public class AuthController {
                 .header("Location", githubAuth.getAuthorizationUrl(codeChallenge))
                 .build();
     }
-    @PostMapping("/github/callback")
+    @GetMapping("/github/callback")
     public ResponseEntity<ApiResponse<AuthResponse>> callback(
             @RequestParam String code,
-            @RequestParam String codeVerifier) {
+            @RequestParam(required = false) String codeVerifier) {
         AuthResponse authResponse = authService.authenticate(code, codeVerifier);
         return ResponseEntity.ok(new ApiResponse<>(authResponse, "Authentication successful"));
+    }
+
+    @GetMapping("/pkce-test")
+    public ResponseEntity<String> pkceTest() throws Exception {
+        String verifier = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX";
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(verifier.getBytes(StandardCharsets.US_ASCII));
+        String challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        return ResponseEntity.ok("verifier: " + verifier + "\nchallenge: " + challenge);
     }
 
     @PostMapping("/refresh")

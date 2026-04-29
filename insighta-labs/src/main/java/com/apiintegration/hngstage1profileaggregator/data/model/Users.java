@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private String userid;
     private Integer githubId;
     private String avatarUrl;
     private String userName;

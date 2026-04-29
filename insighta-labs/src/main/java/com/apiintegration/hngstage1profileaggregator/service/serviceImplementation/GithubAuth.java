@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GithubAuth implements OAuth {
-    @Value("${github.client.id}")
+    @Value("${CLIENT_ID}")
     private String clientId;
     @Override
     public String getAuthUrl() {
@@ -15,7 +15,7 @@ public class GithubAuth implements OAuth {
 
     @Override
     public String getAuthorizationUrl(String codeChallenge) {
-        return String.format("https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s)",clientId,codeChallenge);
+        return String.format("https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256",clientId,codeChallenge);
     }
 
 
