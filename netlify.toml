@@ -1,4 +1,4 @@
 [build]
   base = "insighta-portal"
   command = "npm run build"
-  publish = "insighta-portal/dist"
+  publish = "dist"
