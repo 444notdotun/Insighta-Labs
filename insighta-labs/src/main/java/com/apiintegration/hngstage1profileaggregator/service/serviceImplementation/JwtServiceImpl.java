@@ -24,7 +24,7 @@ public class JwtServiceImpl implements JwtService {
     public String generateToken(Users username) {
         return Jwts.builder()
                 .signWith(getSecretKey())
-                .subject(username.getId())
+                .subject(username.getUserid())
                 .issuedAt(new Date())
                 .claim("role",username.getRole())
                 .expiration(new Date(System.currentTimeMillis()+expiration))
