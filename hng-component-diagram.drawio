@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- Title -->
+    <mxCell id="title" value="HNG Stage 3 — Component Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#00e5ff;" vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="1000" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- ══ CLIENT ZONE ══ -->
+    <mxCell id="zone-client" value="CLIENT LAYER — runs on user machine" style="swimlane;startSize=30;fillColor=#0d1117;strokeColor=#00e5ff;fontColor=#00e5ff;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="1300" height="200" as="geometry" />
+    </mxCell>
+
+    <!-- CLI Tool -->
+    <mxCell id="cli" value="⌨️ CLI Tool (Node.js)&#xa;─────────────────&#xa;• generates code_verifier + code_challenge&#xa;• opens browser → GitHub login URL&#xa;• spins up localhost:8080 server&#xa;• catches auth code from redirect&#xa;• calls POST /auth/callback&#xa;• stores JWT + refresh token in memory&#xa;• sends JWT on every API request&#xa;• calls POST /auth/refresh on expiry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0533;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-client">
+      <mxGeometry x="30" y="50" width="580" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Web Portal -->
+    <mxCell id="web" value="🌐 Web Portal (React + Vite)&#xa;─────────────────&#xa;• GitHub OAuth via browser redirect&#xa;• HTTP-only cookies for refresh token&#xa;• CSRF token on mutating requests&#xa;• role-based UI (admin vs analyst)&#xa;• query builder — 7 filter params&#xa;• CSV export download button&#xa;• axios instance with interceptors&#xa;• AuthContext for JWT state" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a1f15;strokeColor=#10b981;fontColor=#6ee7b7;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-client">
+      <mxGeometry x="660" y="50" width="580" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- ══ ARROWS client → backend ══ -->
+    <mxCell id="arr-cli-back" value="HTTPS / JWT" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=10;fontColor=#7c3aed;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="330" y="282" as="sourcePoint"/><mxPoint x="330" y="340" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="arr-web-back" value="HTTPS / JWT" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontSize=10;fontColor=#10b981;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="990" y="282" as="sourcePoint"/><mxPoint x="990" y="340" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- ══ BACKEND ZONE ══ -->
+    <mxCell id="zone-backend" value="BACKEND — Spring Boot on Render" style="swimlane;startSize=30;fillColor=#0d1117;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="1300" height="520" as="geometry" />
+    </mxCell>
+
+    <!-- Filter: Rate Limit -->
+    <mxCell id="f1" value="🚦 Rate Limit Filter [1st]&#xa;─────────────────&#xa;• 10 req/min → /auth/**&#xa;• 60 req/min → everything else&#xa;• reads Redis counter by IP/userId&#xa;• returns 429 if exceeded&#xa;• increments + sets TTL 60s" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a1a1f;strokeColor=#06b6d4;fontColor=#67e8f9;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="30" y="50" width="370" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Filter: JWT -->
+    <mxCell id="f2" value="🔐 JWT Auth Filter [2nd]&#xa;─────────────────&#xa;• extracts Bearer token from header&#xa;• checks Redis banned token list&#xa;• verifies JWT signature + expiry&#xa;• sets SecurityContext (userId, role)&#xa;• returns 401 if invalid/expired" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a1a1f;strokeColor=#06b6d4;fontColor=#67e8f9;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="430" y="50" width="370" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Filter: Logger -->
+    <mxCell id="f3" value="📋 Request Logger Filter [3rd]&#xa;─────────────────&#xa;• records startTime on request in&#xa;• records endTime on response out&#xa;• calculates responseTime (ms)&#xa;• logs: method, endpoint, status, time&#xa;• saves to request_logs (PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a1a1f;strokeColor=#06b6d4;fontColor=#67e8f9;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="830" y="50" width="370" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Controllers -->
+    <mxCell id="c1" value="🔑 AuthController&#xa;─────────────────&#xa;• GET /auth/github → 302&#xa;• GET /auth/callback&#xa;• POST /auth/refresh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="30" y="220" width="370" height="100" as="geometry" />
+    </mxCell>
+    <mxCell id="c2" value="🔍 QueryController&#xa;─────────────────&#xa;• GET /api/query (7 filters)&#xa;• GET /export/csv&#xa;• X-API-Version header&#xa;• @PreAuthorize roles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="430" y="220" width="370" height="100" as="geometry" />
+    </mxCell>
+    <mxCell id="c3" value="👤 UserController&#xa;─────────────────&#xa;• GET /users/me&#xa;• admin-only endpoints&#xa;• analyst-only endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="830" y="220" width="370" height="100" as="geometry" />
+    </mxCell>
+
+    <!-- Services -->
+    <mxCell id="s1" value="🐙 GitHubOAuthService&#xa;─────────────────&#xa;• builds GitHub auth URL + code_challenge&#xa;• exchanges code + verifier + client secret&#xa;• calls GET /user for profile&#xa;• upserts user in PostgreSQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="30" y="360" width="370" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" value="🎫 TokenService&#xa;─────────────────&#xa;• generates JWT (3 min)&#xa;• generates refresh token UUID (5 min)&#xa;• saves refresh token to PostgreSQL&#xa;• validates + rotates on /auth/refresh&#xa;• isRevoked=true on rotation (audit)&#xa;• adds banned tokens to Redis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="430" y="360" width="370" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="s3" value="🔍 QueryService&#xa;─────────────────&#xa;• JPA Specifications (dynamic filters)&#xa;• 7 combinable filter params&#xa;• PageRequest + Page&lt;T&gt;&#xa;• Sort + SortFieldMapper&#xa;• CSV streaming export&#xa;• natural language query parser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1200;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-backend">
+      <mxGeometry x="830" y="360" width="370" height="120" as="geometry" />
+    </mxCell>
+
+    <!-- ══ BOTTOM ZONE: EXTERNAL + STORAGE ══ -->
+
+    <!-- External -->
+    <mxCell id="zone-ext" value="EXTERNAL" style="swimlane;startSize=30;fillColor=#0d1117;strokeColor=#ef4444;fontColor=#ef4444;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="920" width="620" height="180" as="geometry" />
+    </mxCell>
+
+    <mxCell id="github" value="🐙 GitHub API&#xa;─────────────────&#xa;• GET /login/oauth/authorize&#xa;• POST /login/oauth/access_token (verifies PKCE)&#xa;• GET /user — returns profile&#xa;• requires client_id + client_secret from backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0000;strokeColor=#ef4444;fontColor=#fca5a5;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-ext">
+      <mxGeometry x="30" y="50" width="550" height="110" as="geometry" />
+    </mxCell>
+
+    <!-- Storage -->
+    <mxCell id="zone-storage" value="STORAGE LAYER" style="swimlane;startSize=30;fillColor=#0d1117;strokeColor=#ec4899;fontColor=#ec4899;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="920" width="620" height="180" as="geometry" />
+    </mxCell>
+
+    <mxCell id="pg" value="🐘 PostgreSQL&#xa;─────────────────&#xa;• users (id, email, role, githubId)&#xa;• refresh_tokens (token, userId, expiresAt, isRevoked)&#xa;• request_logs (method, endpoint, status, responseTime)&#xa;• query engine intelligence records" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0010;strokeColor=#ec4899;fontColor=#f9a8d4;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-storage">
+      <mxGeometry x="20" y="50" width="270" height="110" as="geometry" />
+    </mxCell>
+
+    <mxCell id="redis" value="⚡ Redis&#xa;─────────────────&#xa;• rate:auth:{ip} → TTL 60s (limit 10)&#xa;• rate:api:{userId} → TTL 60s (limit 60)&#xa;• banned:{token} → TTL = JWT expiry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a0800;strokeColor=#f97316;fontColor=#fdba74;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="zone-storage">
+      <mxGeometry x="310" y="50" width="280" height="110" as="geometry" />
+    </mxCell>
+
+    <!-- ══ ARROWS backend → external/storage ══ -->
+    <mxCell id="arr-back-gh" value="HTTP (server-to-server)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;fontSize=10;fontColor=#ef4444;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="215" y="862" as="sourcePoint"/><mxPoint x="215" y="920" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="arr-back-pg" value="JDBC" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ec4899;strokeWidth=2;fontSize=10;fontColor=#ec4899;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="870" y="862" as="sourcePoint"/><mxPoint x="870" y="920" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="arr-back-redis" value="Lettuce" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f97316;strokeWidth=2;fontSize=10;fontColor=#f97316;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="1150" y="862" as="sourcePoint"/><mxPoint x="1150" y="920" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

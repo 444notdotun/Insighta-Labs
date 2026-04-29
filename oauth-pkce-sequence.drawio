@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- Title -->
+    <mxCell id="title" value="GitHub OAuth + PKCE — Sequence Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#00e5ff;" vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="800" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- ACTORS -->
+    <!-- User -->
+    <mxCell id="actor-user" value="👤 User" style="shape=mxgraph.flowchart.start_2;fillColor=#00e5ff;strokeColor=#006EAF;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="80" y="80" width="80" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-user" value="" style="endArrow=none;dashed=1;strokeColor=#00e5ff;strokeWidth=1;" edge="1" parent="1" source="actor-user">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="120" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- CLI -->
+    <mxCell id="actor-cli" value="⌨️ CLI Tool" style="shape=mxgraph.flowchart.start_2;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="250" y="80" width="80" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-cli" value="" style="endArrow=none;dashed=1;strokeColor=#7c3aed;strokeWidth=1;" edge="1" parent="1" source="actor-cli">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="290" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- Browser -->
+    <mxCell id="actor-browser" value="🌐 Browser" style="shape=mxgraph.flowchart.start_2;fillColor=#10b981;strokeColor=#047857;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="420" y="80" width="80" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-browser" value="" style="endArrow=none;dashed=1;strokeColor=#10b981;strokeWidth=1;" edge="1" parent="1" source="actor-browser">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="460" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- Backend -->
+    <mxCell id="actor-backend" value="⚙️ Backend" style="shape=mxgraph.flowchart.start_2;fillColor=#f59e0b;strokeColor=#b45309;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="600" y="80" width="80" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-backend" value="" style="endArrow=none;dashed=1;strokeColor=#f59e0b;strokeWidth=1;" edge="1" parent="1" source="actor-backend">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="640" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- GitHub -->
+    <mxCell id="actor-github" value="🐙 GitHub API" style="shape=mxgraph.flowchart.start_2;fillColor=#ef4444;strokeColor=#b91c1c;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="780" y="80" width="80" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-github" value="" style="endArrow=none;dashed=1;strokeColor=#ef4444;strokeWidth=1;" edge="1" parent="1" source="actor-github">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="820" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- DB/Redis -->
+    <mxCell id="actor-db" value="🗄️ PostgreSQL/Redis" style="shape=mxgraph.flowchart.start_2;fillColor=#ec4899;strokeColor=#9d174d;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="960" y="80" width="100" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="line-db" value="" style="endArrow=none;dashed=1;strokeColor=#ec4899;strokeWidth=1;" edge="1" parent="1" source="actor-db">
+      <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1010" y="1050"/></Array></mxGeometry>
+    </mxCell>
+
+    <!-- GROUP 1 LABEL -->
+    <mxCell id="g1" value="① PKCE SETUP" style="text;html=1;strokeColor=#7c3aed;fillColor=#f5f0ff;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;fontColor=#7c3aed;" vertex="1" parent="1">
+      <mxGeometry x="40" y="150" width="1100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Step 1: User → CLI -->
+    <mxCell id="s1" value="1. login --github" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00e5ff;strokeWidth=2;fontSize=10;fontColor=#00e5ff;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="120" y="195" as="sourcePoint"/><mxPoint x="290" y="195" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 2: CLI generates code_verifier (box) -->
+    <mxCell id="s2box" value="2. generate code_verifier&#xa;SHA-256(verifier) → code_challenge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#7c3aed;fontColor=#7c3aed;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="210" y="215" width="230" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- GROUP 2 LABEL -->
+    <mxCell id="g2" value="② OAUTH START — CLI calls backend, backend builds GitHub URL" style="text;html=1;strokeColor=#10b981;fillColor=#f0fdf4;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;fontColor=#10b981;" vertex="1" parent="1">
+      <mxGeometry x="40" y="270" width="1100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Step 3: CLI → Backend -->
+    <mxCell id="s3" value="3. GET /auth/github?code_challenge=..." style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=10;fontColor=#7c3aed;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="290" y="310" as="sourcePoint"/><mxPoint x="640" y="310" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 4: Backend → CLI 302 -->
+    <mxCell id="s4" value="4. 302 redirect → GitHub Auth URL" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;fontColor=#f59e0b;fontStyle=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="340" as="sourcePoint"/><mxPoint x="290" y="340" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 5: CLI opens browser -->
+    <mxCell id="s5" value="5. CLI opens browser with GitHub URL" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=10;fontColor=#7c3aed;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="290" y="370" as="sourcePoint"/><mxPoint x="460" y="370" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- GROUP 3 LABEL -->
+    <mxCell id="g3" value="③ GITHUB — User logs in, GitHub sends auth code to localhost callback" style="text;html=1;strokeColor=#ef4444;fillColor=#fef2f2;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;fontColor=#ef4444;" vertex="1" parent="1">
+      <mxGeometry x="40" y="395" width="1100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Step 6: Browser → GitHub -->
+    <mxCell id="s6" value="6. GET /authorize?code_challenge=... (browser request)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontSize=10;fontColor=#10b981;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="435" as="sourcePoint"/><mxPoint x="820" y="435" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 7: User authorizes -->
+    <mxCell id="s7" value="7. User clicks Authorize on GitHub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00e5ff;strokeWidth=2;fontSize=10;fontColor=#00e5ff;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="120" y="465" as="sourcePoint"/><mxPoint x="460" y="465" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 8: GitHub 302 to localhost -->
+    <mxCell id="s8" value="8. 302 → localhost:8080/callback?code=AUTH_CODE (browser follows)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;fontSize=10;fontColor=#ef4444;fontStyle=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="495" as="sourcePoint"/><mxPoint x="460" y="495" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 9: CLI catches code -->
+    <mxCell id="s9" value="9. CLI local server catches auth code" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#10b981;strokeWidth=2;fontSize=10;fontColor=#10b981;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="525" as="sourcePoint"/><mxPoint x="290" y="525" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- GROUP 4 LABEL -->
+    <mxCell id="g4" value="④ TOKEN EXCHANGE — CLI sends code + verifier to backend" style="text;html=1;strokeColor=#f59e0b;fillColor=#fffbeb;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;fontColor=#f59e0b;" vertex="1" parent="1">
+      <mxGeometry x="40" y="550" width="1100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Step 10: CLI → Backend with code + verifier -->
+    <mxCell id="s10" value="10. POST /auth/callback {code, code_verifier}" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=10;fontColor=#7c3aed;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="290" y="590" as="sourcePoint"/><mxPoint x="640" y="590" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 11: Backend → GitHub token endpoint -->
+    <mxCell id="s11" value="11. POST /login/oauth/access_token {code, code_verifier, client_id, client_secret}" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;fontColor=#f59e0b;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="620" as="sourcePoint"/><mxPoint x="820" y="620" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 12: GitHub verifies PKCE (box) -->
+    <mxCell id="s12box" value="12. SHA-256(code_verifier) == code_challenge? ✓&#xa;PKCE verified → return access_token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef2f2;strokeColor=#ef4444;fontColor=#ef4444;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="750" y="640" width="280" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Step 13: GitHub returns access token -->
+    <mxCell id="s13" value="13. github_access_token" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;fontSize=10;fontColor=#ef4444;fontStyle=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="695" as="sourcePoint"/><mxPoint x="640" y="695" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- GROUP 5 LABEL -->
+    <mxCell id="g5" value="⑤ USER PROFILE + JWT ISSUANCE" style="text;html=1;strokeColor=#00e5ff;fillColor=#ecfeff;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;fontColor=#00e5ff;" vertex="1" parent="1">
+      <mxGeometry x="40" y="720" width="1100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Step 14: Backend → GitHub profile -->
+    <mxCell id="s14" value="14. GET /user (Authorization: Bearer github_access_token)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;fontColor=#f59e0b;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="760" as="sourcePoint"/><mxPoint x="820" y="760" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 15: GitHub returns profile -->
+    <mxCell id="s15" value="15. {id, email, login, avatar_url}" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef4444;strokeWidth=2;fontSize=10;fontColor=#ef4444;fontStyle=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="790" as="sourcePoint"/><mxPoint x="640" y="790" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 16: Backend → DB upsert user -->
+    <mxCell id="s16" value="16. upsert user + save refresh_token (isRevoked=false, expiresAt=+5min)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;fontColor=#f59e0b;fontStyle=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="820" as="sourcePoint"/><mxPoint x="1010" y="820" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Step 17: Backend generates JWT + refresh -->
+    <mxCell id="s17box" value="17. generate JWT (3 min) + refresh_token (5 min, UUID)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="560" y="840" width="260" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- Step 18: Backend → CLI returns tokens -->
+    <mxCell id="s18" value="18. {jwt, refreshToken} ✓ CLI authenticated" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;fontColor=#f59e0b;fontStyle=1;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="895" as="sourcePoint"/><mxPoint x="290" y="895" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <!-- Final note -->
+    <mxCell id="fnote" value="✓ CLI stores JWT in memory. Uses JWT on every API call. Sends refreshToken to POST /auth/refresh when JWT expires (every 3 min)." style="text;html=1;strokeColor=#10b981;fillColor=#f0fdf4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontColor=#10b981;" vertex="1" parent="1">
+      <mxGeometry x="40" y="925" width="1100" height="35" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
