@@ -19,4 +19,5 @@ public interface ProfileService {
     Page<Summary> getProfiles(String gender, String ageGroup, String countryId, Integer minAge, Integer maxAge, Float minGenderProbability, Float minCountyProbability, Pageable pageable);
     void deleteProfile(UUID id);
     Page<Summary> search(String note,Pageable pageable);
+    byte[] exportCsv(String gender, String ageGroup, String countryId, Integer minAge, Integer maxAge, Pageable pageable);
 }

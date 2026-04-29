@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -160,6 +161,24 @@ try {
             throw new RuntimeException("Unable to interpret query");
         }
        return getProfiles(query.getGender(),query.getAgeGroup(),query.getCountryId(),minAge,maxAge,null,null,pageable);
+    }
+
+    @Override
+    public byte[] exportCsv(String gender, String ageGroup, String countryId, Integer minAge, Integer maxAge,Pageable pageable) {
+            Page<Summary> profiles = getProfiles(gender, ageGroup, countryId, minAge, maxAge, null, null, pageable);
+            StringBuilder csv = new StringBuilder();
+            csv.append("id,name,gender,age,age_group,country_id\n");
+            for (Summary profile : profiles.getContent()) {
+                csv.append(String.format("%s,%s,%s,%s,%s,%s\n",
+                        profile.getId(),
+                        profile.getName(),
+                        profile.getGender(),
+                        profile.getAge(),
+                        profile.getAgeGroup(),
+                        profile.getCountryId()
+                ));
+            }
+            return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     private String DetermineAgeGroup(int age) {
