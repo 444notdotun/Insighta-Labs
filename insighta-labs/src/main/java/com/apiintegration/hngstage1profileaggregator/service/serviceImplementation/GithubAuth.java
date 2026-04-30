@@ -14,7 +14,13 @@ public class GithubAuth implements OAuth {
     }
 
     @Override
-    public String getAuthorizationUrl(String codeChallenge) {
+    public String getRedirectUrl(String codeChallenge,String redirectUrl) {
+        if(redirectUrl !=null&& !redirectUrl.isEmpty()) {
+            return String.format(
+                    "https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s",
+                    clientId, codeChallenge, redirectUrl
+            );
+        }
         return String.format("https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256",clientId,codeChallenge);
     }
 
