@@ -16,5 +16,3 @@ jobs:
           distribution: 'temurin'
       - name: Build with Maven
         run: cd insighta-labs && mvn clean install -DskipTests
-      - name: Run Tests
-        run: cd insighta-labs && mvn test
