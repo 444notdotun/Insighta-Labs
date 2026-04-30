@@ -15,10 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +33,14 @@ public class ProfileController {
     @GetMapping({"/","","/api"})
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
+    }
+    @GetMapping("/api/users/me")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        return ResponseEntity.ok(new ApiResponse<>(Map.of(
+                "userId", authentication.getName(),
+                "role", authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "")
+        )));
     }
 
 

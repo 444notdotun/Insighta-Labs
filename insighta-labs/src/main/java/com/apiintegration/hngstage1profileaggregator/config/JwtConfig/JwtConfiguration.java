@@ -45,6 +45,8 @@ public class JwtConfiguration extends OncePerRequestFilter {
                 String role = jwtService.getRoleFromToken(token).name();
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of(new SimpleGrantedAuthority("ROLE_"+role)));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            }else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
             filterChain.doFilter(request, response);
     }

@@ -8,5 +8,6 @@ public interface RefreshTokenService {
         String generateRefreshToken(Users user);
         RefreshToken validateRefreshToken(String token);
     AuthResponse rotateRefreshToken(String token);
+    void revokeToken(String token);
     }
 

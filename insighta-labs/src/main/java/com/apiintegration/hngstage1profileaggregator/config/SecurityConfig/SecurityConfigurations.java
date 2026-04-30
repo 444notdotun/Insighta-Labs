@@ -1,5 +1,6 @@
 package com.apiintegration.hngstage1profileaggregator.config.SecurityConfig;
 
+import com.apiintegration.hngstage1profileaggregator.config.ApiVersionFilter;
 import com.apiintegration.hngstage1profileaggregator.config.JwtConfig.JwtConfiguration;
 import com.apiintegration.hngstage1profileaggregator.config.RateLimitFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class SecurityConfigurations {
     private JwtConfiguration jwtConfiguration;
     @Autowired
     private RateLimitFilter rateLimitFilter;
+    @Autowired
+    private ApiVersionFilter apiVersionFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception {
@@ -35,6 +38,7 @@ public class SecurityConfigurations {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/","/api").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(apiVersionFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtConfiguration, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -55,6 +56,15 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestBody RefreshRequest request) {
         AuthResponse authResponse = refreshTokenService.rotateRefreshToken(request.getRefreshToken());
         return ResponseEntity.ok(new ApiResponse<>(authResponse, "Token refreshed successfully"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refresh_token");
+        if (refreshToken != null) {
+            refreshTokenService.revokeToken(refreshToken);
+        }
+        return ResponseEntity.ok(new ApiResponse<>(null, "Logged out successfully"));
     }
 
     private static @NonNull String getCliOutput(String state, AuthResponse authResponse) {
