@@ -44,7 +44,7 @@ public class ProfileController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/api/profiles")
     public ResponseEntity<ApiResponse<ProfileResponse>> getProfile(@Valid @RequestBody GetProfilesRequest getProfilesRequest) {
         ServiceResponse<ProfileResponse> profileResponseServiceResponse =profileService.createProfile(getProfilesRequest);

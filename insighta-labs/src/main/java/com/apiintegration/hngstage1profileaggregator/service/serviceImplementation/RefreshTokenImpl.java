@@ -61,11 +61,4 @@ import java.util.UUID;
         return authResponse;
     }
 
-    @Override
-    public void revokeToken(String token) {
-        refreshTokenRepository.findByToken(token).ifPresent(rt -> {
-            rt.setRevoked(true);
-            refreshTokenRepository.save(rt);
-        });
-    }
 }

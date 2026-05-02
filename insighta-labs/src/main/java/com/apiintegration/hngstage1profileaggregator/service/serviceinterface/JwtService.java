@@ -8,6 +8,8 @@ public interface JwtService {
     String getUsernameFromToken(String token);
     boolean validateToken(String token);
     Roles getRoleFromToken(String token);
+    String generateStateToken(String redirectUrl);
+    String getRedirectUrlFromStateToken(String token);
 
 
 }

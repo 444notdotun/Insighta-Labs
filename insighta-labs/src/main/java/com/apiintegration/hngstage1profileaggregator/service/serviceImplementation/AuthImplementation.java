@@ -10,6 +10,7 @@ import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.Au
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.OAuth;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.RefreshTokenService;
+import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +37,12 @@ public class AuthImplementation implements Auth {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+
     @Value("${CLIENT_ID}")
     private String clientId;
     @Value("${CLIENT_SECRET}")
     private String clientSecret;
+
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ModelMapper modelMapper = new ModelMapper();
@@ -60,6 +63,7 @@ public class AuthImplementation implements Auth {
                     newUser.setRole(Roles.ANALYST);
                     return usersRepository.save(newUser);
                 });
+
         return createAuthResponse(user);
     }
 
@@ -78,6 +82,14 @@ public class AuthImplementation implements Auth {
         HttpRequest request = getUserProfileRequest(accessToken);
         HttpResponse<String> response = getUserProfileApi(request);
         return objectMapper.readValue(response.body(), GithubUserResponse.class);
+    }
+    private String validateState(String state){
+        try {
+            return jwtService.getRedirectUrlFromStateToken(state);
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException("State has been tampered"+e.getMessage());
+        }
     }
 
     private AuthResponse createAuthResponse(Users user) {
@@ -120,4 +132,16 @@ public class AuthImplementation implements Auth {
                 .uri(URI.create(url))
                 .build();
     }
+
+    @Override
+    public String getCliOutput(String state, String code, String codeVerifier) {
+        AuthResponse authResponse = authenticate(code, codeVerifier);
+            String redirectUrl = validateState(state);
+        return  redirectUrl+ "?accessToken=" + authResponse.getAccessToken()
+                + "&refreshToken=" + authResponse.getRefreshToken()
+                + "&username=" + authResponse.getUsername()
+                + "&userId=" + authResponse.getUserId();
+    }
+
+
 }

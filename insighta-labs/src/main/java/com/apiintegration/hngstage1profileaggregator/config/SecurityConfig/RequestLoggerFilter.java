@@ -1,4 +1,4 @@
-package com.apiintegration.hngstage1profileaggregator.controller;
+package com.apiintegration.hngstage1profileaggregator.config.SecurityConfig;
 
 import com.apiintegration.hngstage1profileaggregator.data.model.RequestLog;
 import com.apiintegration.hngstage1profileaggregator.data.repository.RequestLoggerRepository;

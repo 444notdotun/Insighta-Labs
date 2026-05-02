@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
     public class RateLimitFilter extends OncePerRequestFilter {
 
         private final Map<String, List<Long>> requestCounts = new ConcurrentHashMap<>();
-        private static final int AUTH_LIMIT = 10;
-        private static final int API_LIMIT = 60;
+    private static final int AUTH_LIMIT = 100;
+    private static final int API_LIMIT = 200;
         private static final long ONE_MINUTE = 60_000L;
 
         @Override

@@ -41,6 +41,23 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public String generateStateToken(String redirectUrl) {
+        return Jwts.builder()
+                .signWith(getSecretKey())
+                .subject("state")
+                .expiration(new Date(System.currentTimeMillis()+expiration))
+                .issuedAt(new Date())
+                .claim("redirectUrl",redirectUrl)
+                .compact();
+    }
+
+    @Override
+    public String getRedirectUrlFromStateToken(String token) {
+        extractClaims(token);
+        return extractClaims(token).get("redirectUrl", String.class);
+    }
+
+    @Override
     public boolean validateToken(String token) {
         try{
             extractClaims(token);
