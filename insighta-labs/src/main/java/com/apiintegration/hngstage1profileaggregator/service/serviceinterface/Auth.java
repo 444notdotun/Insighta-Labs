@@ -7,5 +7,5 @@ import org.springframework.http.ResponseEntity;
 public interface Auth {
     AuthResponse authenticate(String code,String codeVerifier,String state);
     String getCliResponse(AuthResponse authResponse);
-    ResponseEntity<?> getWebResponse(HttpServletResponse httpResponse, AuthResponse authResponse);
+    ResponseEntity<?> getWebResponse( AuthResponse authResponse);
 }

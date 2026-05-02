@@ -83,7 +83,7 @@ public class AuthImplementation implements Auth {
     }
 
     @Override
-    public ResponseEntity<?> getWebResponse(HttpServletResponse httpResponse, AuthResponse authResponse) {
+    public ResponseEntity<?> getWebResponse( AuthResponse authResponse) {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", authResponse.getRedirectUrl()
                         + "?username=" + authResponse.getUsername()

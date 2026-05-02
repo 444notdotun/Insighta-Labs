@@ -39,12 +39,10 @@ public class AuthController {
     @GetMapping("/github/callback")
     public ResponseEntity<?> callback(
             @RequestParam String code,
-            @RequestParam(required = false) String state,
-            HttpServletResponse httpResponse) {
+            @RequestParam(required = false) String state) {
         AuthResponse authResponse = authService.authenticate(code, null, state);
-        System.out.println("isWeb: " + authResponse.getWeb());
         if (authResponse.getWeb()) {
-            return authService.getWebResponse(httpResponse, authResponse);
+            return authService.getWebResponse(authResponse);
         }
         String cliRedirect = authService.getCliResponse(authResponse);
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -68,7 +66,6 @@ public class AuthController {
         if (isWebRequest) {
             refreshTokenService.setRefreshCookies(httpResponse, authResponse);
         }
-
         return ResponseEntity.ok(new ApiResponse<>(authResponse, "Token refreshed successfully"));
     }
 
