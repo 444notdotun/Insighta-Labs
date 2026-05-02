@@ -1,5 +1,6 @@
 package com.apiintegration.hngstage1profileaggregator.service.serviceImplementation;
 
+import com.apiintegration.hngstage1profileaggregator.dtos.request.GithubRequest;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.OAuth;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,21 +20,12 @@ public class GithubAuth implements OAuth {
 
 
     @Override
-    public String getRedirectUrl(String codeChallenge, String redirectUrl) {
-
-        if(redirectUrl!=null && !redirectUrl.isEmpty()){
-         String  state = jwtService.generateStateToken(redirectUrl);
+    public String getRedirectUrl(GithubRequest githubRequest) {
+         String  state = jwtService.generateStateToken(githubRequest);
             return String.format(
-                    "https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s",
-                    clientId, codeChallenge, state
+                   "https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s",
+                    clientId, githubRequest.getCodeChallenge(),state
             );
-
-        }
-
-        return String.format(
-                "https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256",
-                clientId, codeChallenge
-        );
     }
 
 

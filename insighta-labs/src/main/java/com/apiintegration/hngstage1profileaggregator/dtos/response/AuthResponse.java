@@ -10,4 +10,5 @@ public class AuthResponse {
     private String username;
     private String userId;
     private String redirectUrl;
+    private Boolean web;
 }

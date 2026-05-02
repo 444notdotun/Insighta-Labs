@@ -2,6 +2,7 @@ package com.apiintegration.hngstage1profileaggregator.service.serviceImplementat
 
 import com.apiintegration.hngstage1profileaggregator.data.model.Roles;
 import com.apiintegration.hngstage1profileaggregator.data.model.Users;
+import com.apiintegration.hngstage1profileaggregator.dtos.request.GithubRequest;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -41,21 +42,23 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateStateToken(String redirectUrl) {
+    public String generateStateToken(GithubRequest githubRequest) {
         return Jwts.builder()
                 .signWith(getSecretKey())
                 .subject("state")
                 .expiration(new Date(System.currentTimeMillis()+expiration))
                 .issuedAt(new Date())
-                .claim("redirectUrl",redirectUrl)
+                .claim("redirectUrl",githubRequest.getRedirectUrl())
+                .claim("codeVerifier",githubRequest.getCodeVerifier())
+                .claim("isWeb",githubRequest.isWeb())
                 .compact();
     }
 
     @Override
-    public String getRedirectUrlFromStateToken(String token) {
-        extractClaims(token);
-        return extractClaims(token).get("redirectUrl", String.class);
+    public Claims  ValidateStateToken(String token) {
+        return extractClaims(token);
     }
+
 
     @Override
     public boolean validateToken(String token) {

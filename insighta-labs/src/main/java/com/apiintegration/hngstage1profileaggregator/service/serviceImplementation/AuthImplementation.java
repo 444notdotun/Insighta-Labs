@@ -10,10 +10,16 @@ import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.Au
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.OAuth;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.RefreshTokenService;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -22,7 +28,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
+@Slf4j
 @Service
 public class AuthImplementation implements Auth {
 
@@ -48,8 +54,9 @@ public class AuthImplementation implements Auth {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public AuthResponse authenticate(String accessCode, String codeVerifier) {
-        GithubResponse githubResponse = exchangeCodeForToken(accessCode, codeVerifier);
+    public AuthResponse authenticate(String accessCode, String codeVerifier,String state) {
+        Claims verifiedState = validateState(state);
+        GithubResponse githubResponse = exchangeCodeForToken(accessCode, verifiedState.get("codeVerifier", String.class));
         if (githubResponse.getAccessToken() == null) {
             throw new RuntimeException("GitHub token exchange failed — invalid code or verifier");
         }
@@ -63,8 +70,27 @@ public class AuthImplementation implements Auth {
                     newUser.setRole(Roles.ANALYST);
                     return usersRepository.save(newUser);
                 });
+        return createAuthResponse(user,verifiedState);
+    }
 
-        return createAuthResponse(user);
+    @Override
+    public String getCliResponse(AuthResponse authResponse) {
+            return authResponse.getRedirectUrl()
+                    + "?accessToken=" + authResponse.getAccessToken()
+                    + "&refreshToken=" + authResponse.getRefreshToken()
+                    + "&username=" + authResponse.getUsername()
+                    + "&userId=" + authResponse.getUserId();
+    }
+
+    @Override
+    public ResponseEntity<?> getWebResponse(HttpServletResponse httpResponse, AuthResponse authResponse) {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", authResponse.getRedirectUrl()
+                        + "?username=" + authResponse.getUsername()
+                        + "&userId=" + authResponse.getUserId()
+                        + "&accessToken=" + authResponse.getAccessToken()
+                        + "&refreshToken=" + authResponse.getRefreshToken())
+                .build();
     }
 
     private GithubResponse exchangeCodeForToken(String accessCode, String codeVerifier) {
@@ -83,19 +109,21 @@ public class AuthImplementation implements Auth {
         HttpResponse<String> response = getUserProfileApi(request);
         return objectMapper.readValue(response.body(), GithubUserResponse.class);
     }
-    private String validateState(String state){
+    private Claims validateState(String state){
         try {
-            return jwtService.getRedirectUrlFromStateToken(state);
+            return jwtService.ValidateStateToken(state);
 
         } catch (RuntimeException e) {
             throw new RuntimeException("State has been tampered"+e.getMessage());
         }
     }
 
-    private AuthResponse createAuthResponse(Users user) {
+    private AuthResponse createAuthResponse(Users user,Claims claims) {
        AuthResponse authResponse = modelMapper.map(user, AuthResponse.class);
         authResponse.setAccessToken(jwtService.generateToken(user));
         authResponse.setRefreshToken(refreshTokenService.generateRefreshToken(user));
+        authResponse.setRedirectUrl(claims.get("redirectUrl", String.class));
+        authResponse.setWeb((Boolean) claims.get("isWeb"));
         return authResponse;
     }
 
@@ -132,16 +160,4 @@ public class AuthImplementation implements Auth {
                 .uri(URI.create(url))
                 .build();
     }
-
-    @Override
-    public String getCliOutput(String state, String code, String codeVerifier) {
-        AuthResponse authResponse = authenticate(code, codeVerifier);
-            String redirectUrl = validateState(state);
-        return  redirectUrl+ "?accessToken=" + authResponse.getAccessToken()
-                + "&refreshToken=" + authResponse.getRefreshToken()
-                + "&username=" + authResponse.getUsername()
-                + "&userId=" + authResponse.getUserId();
-    }
-
-
 }

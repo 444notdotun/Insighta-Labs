@@ -4,9 +4,13 @@ import com.apiintegration.hngstage1profileaggregator.data.model.RefreshToken;
 import com.apiintegration.hngstage1profileaggregator.data.model.Users;
 import com.apiintegration.hngstage1profileaggregator.data.repository.RefreshTokenRepository;
 import com.apiintegration.hngstage1profileaggregator.data.repository.UsersRepository;
+import com.apiintegration.hngstage1profileaggregator.dtos.request.RefreshRequest;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.AuthResponse;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.RefreshTokenService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +63,43 @@ import java.util.UUID;
         authResponse.setAccessToken(newJwt);
         authResponse.setRefreshToken(newRefreshToken);
         return authResponse;
+    }
+
+    @Override
+    public String extractRefreshToken(RefreshRequest request, HttpServletRequest httpRequest) {
+            if (httpRequest.getCookies() == null) return null;
+            for (Cookie cookie : httpRequest.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+            return null;
+
+    }
+
+    @Override
+    public void setRefreshCookies(HttpServletResponse httpResponse, AuthResponse authResponse) {
+            Cookie accessCookie = new Cookie("access_token", authResponse.getAccessToken());
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(true);
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(180);
+
+            Cookie refreshCookie = new Cookie("refresh_token", authResponse.getRefreshToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(true);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(300);
+
+            httpResponse.addCookie(accessCookie);
+            httpResponse.addCookie(refreshCookie);
+
+    }
+
+    @Override
+    public boolean isWebRequest(RefreshRequest request) {
+            return request == null || request.getRefreshToken() == null;
+        
     }
 
 }
