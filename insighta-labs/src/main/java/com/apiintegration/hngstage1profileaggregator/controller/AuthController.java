@@ -1,6 +1,6 @@
 package com.apiintegration.hngstage1profileaggregator.controller;
 
-import com.apiintegration.hngstage1profileaggregator.dtos.request.GithubRequest;
+import com.apiintegration.hngstage1profileaggregator.dtos.request.ExchangeTokenRequest;
 import com.apiintegration.hngstage1profileaggregator.dtos.request.RefreshRequest;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.ApiResponse;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.AuthResponse;
@@ -9,13 +9,14 @@ import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.Au
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.OAuth;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.RefreshTokenService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -30,24 +31,42 @@ public class AuthController {
     @Autowired
     private OAuth githubAuth;
 
-    @PostMapping("/github")
-    public ResponseEntity<ApiResponse<GithubUrlResponse>> redirectToGithub(@RequestBody GithubRequest githubRequest) {
-        String githubUrl = githubAuth.getRedirectUrl(githubRequest);
-        return ResponseEntity.ok(new ApiResponse<>(new GithubUrlResponse(githubUrl), "Authorization URL generated"));
+    @GetMapping("/github")
+    public ResponseEntity<?> redirectToGithub(@RequestParam String codeChallenge,
+                                                                           @RequestParam String redirectUrl,
+                                                                           @RequestParam boolean isWeb) {
+        String githubUrl = githubAuth.getRedirectUrl(codeChallenge, redirectUrl, isWeb);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", githubUrl)
+                .body(new ApiResponse<>(new GithubUrlResponse(githubUrl), "Redirecting to GitHub for authentication"));
     }
 
     @GetMapping("/github/callback")
     public ResponseEntity<?> callback(
             @RequestParam String code,
             @RequestParam(required = false) String state) {
-        AuthResponse authResponse = authService.authenticate(code, null, state);
-        if (authResponse.getWeb()) {
-            return authService.getWebResponse(authResponse);
-        }
-        String cliRedirect = authService.getCliResponse(authResponse);
+        String callBackResponse = authService.requestVerifierFromClient(code,  state);
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", cliRedirect)
+                .header("Location", callBackResponse)
                 .build();
+    }
+
+    @PostMapping("/github/exchange")
+    public ResponseEntity<?> exchangeTokenForCodeVerifier(
+            @RequestBody ExchangeTokenRequest exchangeToken,
+            HttpServletResponse httpResponse) {
+        AuthResponse authResponse = authService.authenticate(exchangeToken);
+        if (authResponse.getWeb()) {
+            refreshTokenService.setRefreshCookies(httpResponse, authResponse);
+            return ResponseEntity.ok(new ApiResponse<>(
+                    Map.of(
+                            "username", authResponse.getUsername(),
+                            "userId", authResponse.getUserId()
+                    ),
+                    "Authentication successful"
+            ));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(authResponse, "Authentication successful"));
     }
 
     @PostMapping("/refresh")

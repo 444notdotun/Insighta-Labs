@@ -10,8 +10,9 @@ public interface JwtService {
     String getUsernameFromToken(String token);
     boolean validateToken(String token);
     Roles getRoleFromToken(String token);
-    String generateStateToken(GithubRequest githubRequest);
+    String generateStateToken(String redirectUrl, boolean isWeb);
     Claims ValidateStateToken(String token);
 
 
+    String generateClientToken(String key, Boolean isWeb, String redirectUrl);
 }

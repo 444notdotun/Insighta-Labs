@@ -3,6 +3,7 @@ package com.apiintegration.hngstage1profileaggregator.config.JwtConfig;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,32 +26,48 @@ public class JwtConfiguration extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-            String header = request.getHeader("Authorization");
-            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            String path = request.getServletPath();
-            if (path.startsWith("/auth/")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            if (header == null || !header.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            String token = header.substring(7);
-            if(jwtService.validateToken(token)) {
-                String userId = jwtService.getUsernameFromToken(token);
-                String role = jwtService.getRoleFromToken(token).name();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of(new SimpleGrantedAuthority("ROLE_"+role)));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }else {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write("{\"status\":\"error\",\"message\":\"Token expired or invalid\"}");
-        return;
-    }
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
             filterChain.doFilter(request, response);
+            return;
+        }
+        String path = request.getServletPath();
+        if (path.startsWith("/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = null;
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        }
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (jwtService.validateToken(token)) {
+            String userId = jwtService.getUsernameFromToken(token);
+            String role = jwtService.getRoleFromToken(token).name();
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"status\":\"error\",\"message\":\"Token expired or invalid\"}");
+            return;
+        }
+        filterChain.doFilter(request, response);
     }
 }

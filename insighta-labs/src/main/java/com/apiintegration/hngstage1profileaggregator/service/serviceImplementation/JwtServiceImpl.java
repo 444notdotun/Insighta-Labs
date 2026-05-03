@@ -42,21 +42,34 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateStateToken(GithubRequest githubRequest) {
+    public String generateStateToken(String redirectUrl, boolean isWeb) {
+
         return Jwts.builder()
                 .signWith(getSecretKey())
                 .subject("state")
                 .expiration(new Date(System.currentTimeMillis()+expiration))
                 .issuedAt(new Date())
-                .claim("redirectUrl",githubRequest.getRedirectUrl())
-                .claim("codeVerifier",githubRequest.getCodeVerifier())
-                .claim("isWeb",githubRequest.isWeb())
+                .claim("redirectUrl",redirectUrl)
+                .claim("isWeb",isWeb)
                 .compact();
     }
 
     @Override
     public Claims  ValidateStateToken(String token) {
         return extractClaims(token);
+    }
+
+    @Override
+    public String generateClientToken(String key, Boolean isWeb, String redirectUrl) {
+        return Jwts.builder()
+                .signWith(getSecretKey())
+                .subject("clientToken")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis()+120000))
+                .claim("key",key)
+                .claim("isWeb",isWeb)
+                .claim("redirectUrl",redirectUrl)
+                .compact();
     }
 
 

@@ -3,17 +3,21 @@ package com.apiintegration.hngstage1profileaggregator.service.serviceImplementat
 import com.apiintegration.hngstage1profileaggregator.data.model.Roles;
 import com.apiintegration.hngstage1profileaggregator.data.model.Users;
 import com.apiintegration.hngstage1profileaggregator.data.repository.UsersRepository;
+import com.apiintegration.hngstage1profileaggregator.dtos.request.ExchangeTokenRequest;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.AuthResponse;
+import com.apiintegration.hngstage1profileaggregator.dtos.response.CallBackResponse;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.GithubResponse;
 import com.apiintegration.hngstage1profileaggregator.dtos.response.GithubUserResponse;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.Auth;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.JwtService;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.OAuth;
 import com.apiintegration.hngstage1profileaggregator.service.serviceinterface.RefreshTokenService;
+import com.apiintegration.hngstage1profileaggregator.utils.KeyStore;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.id.uuid.UuidGenerator;
 import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
+
 @Slf4j
 @Service
 public class AuthImplementation implements Auth {
@@ -43,6 +49,9 @@ public class AuthImplementation implements Auth {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+    @Autowired
+    private KeyStore keyStore;
+
 
     @Value("${CLIENT_ID}")
     private String clientId;
@@ -54,9 +63,13 @@ public class AuthImplementation implements Auth {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public AuthResponse authenticate(String accessCode, String codeVerifier,String state) {
-        Claims verifiedState = validateState(state);
-        GithubResponse githubResponse = exchangeCodeForToken(accessCode, verifiedState.get("codeVerifier", String.class));
+    public AuthResponse authenticate(ExchangeTokenRequest exchangeTokenRequest) {
+        Claims verifiedExchangeToken = validateState(exchangeTokenRequest.getExchangeToken());
+        String accessCode = keyStore.retrieve(verifiedExchangeToken.get("key", String.class));
+        if(accessCode == null){
+            throw new RuntimeException("Exchange Token expired or used ");
+        }
+        GithubResponse githubResponse = exchangeCodeForToken(accessCode, exchangeTokenRequest.getCodeVerifier());
         if (githubResponse.getAccessToken() == null) {
             throw new RuntimeException("GitHub token exchange failed — invalid code or verifier");
         }
@@ -70,7 +83,7 @@ public class AuthImplementation implements Auth {
                     newUser.setRole(Roles.ANALYST);
                     return usersRepository.save(newUser);
                 });
-        return createAuthResponse(user,verifiedState);
+        return createAuthResponse(user,verifiedExchangeToken);
     }
 
     @Override
@@ -91,6 +104,17 @@ public class AuthImplementation implements Auth {
                         + "&accessToken=" + authResponse.getAccessToken()
                         + "&refreshToken=" + authResponse.getRefreshToken())
                 .build();
+    }
+
+    @Override
+    public String requestVerifierFromClient(String code, String state) {
+        Claims verifiedState = validateState(state);
+        Boolean isWeb = (Boolean) verifiedState.get("isWeb");
+        String redirectUrl = verifiedState.get("redirectUrl", String.class);
+        String key = UUID.randomUUID().toString();
+        keyStore.store(key, code);
+        String exchangeToken = jwtService.generateClientToken(key,isWeb,redirectUrl);
+        return String.format("%s?exchangeToken=%s", redirectUrl,exchangeToken);
     }
 
     private GithubResponse exchangeCodeForToken(String accessCode, String codeVerifier) {

@@ -20,11 +20,11 @@ public class GithubAuth implements OAuth {
 
 
     @Override
-    public String getRedirectUrl(GithubRequest githubRequest) {
-         String  state = jwtService.generateStateToken(githubRequest);
+    public String getRedirectUrl(String codeChallenge, String redirectUrl, boolean isWeb) {
+         String  state = jwtService.generateStateToken(redirectUrl,isWeb);
             return String.format(
                    "https://github.com/login/oauth/authorize?client_id=%s&code_challenge=%s&code_challenge_method=S256&state=%s",
-                    clientId, githubRequest.getCodeChallenge(),state
+                    clientId,codeChallenge,state
             );
     }
 
